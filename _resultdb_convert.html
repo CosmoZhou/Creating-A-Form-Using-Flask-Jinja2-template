@@ -1,0 +1,88 @@
+<div id="rdbConvertModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">ResultDB Convert</h4>
+            </div>
+            <div class="modal-body">
+            <!--modal contents-->
+                <div id="jobid-for-modal" style="display: none;"></div>
+                <form role="form" class="form-horizontal">
+                    <div class="form-group">
+                        <div class="col-xs-8">
+                            <h4><B>For STP:<B></h4>
+                            <h5>Job Id</h5>
+                            <input type="text" class="form-control" id="stp-job-id" style="margin-right: 1px;" value={{ job.id }} readonly>
+                            <h5>Job Name</h5>
+                            <input type="text" class="form-control" id="stp-job-name" style="margin-right: 1px;" value="{{ job.name }}" readonly>
+                            <hr>
+                            <h4><B>For ResultDB:</B></h4>
+                            <h5>Report Type</h5>
+                            <select class="form-control" id="rdb-covert-type" style="margin-right: 1px;">
+                                 <option value="auto" data-jobid={{job.id}}">auto</option>
+                                 <option value="performance" data-jobid={{job.id}}">performance</option>
+                            </select>
+
+                            <h5>Project</h5>
+                            <select class="form-control" id="rdb-covert-project" name="rdb-covert-project" style="margin-right: 1px;" >
+                                {% for rdb_project in rdb_projects %}
+                                <option value="{{ rdb_project }}">{{ rdb_project }}</option>
+                                {% endfor %}
+                            </select>
+                            <h5>Milestone</h5>
+                            <select class="form-control" id="rdb-covert-milestone" style="margin-right: 1px;">
+                                <option value="Z" hidden>Select ResultDB Report Milestone</option>
+                            </select>
+                        </div>
+                   </div>
+                </form>
+            <!--modal contents end-->
+            </div>
+            <div class="modal-footer">
+                <a id="convert-rdbreport-cancel" class="btn btn-default" data-dismiss="modal">Cancel</a>
+                <a id="convert-rdbreport-submit" class="btn btn-primary">Convert</a>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<script src="{{ url_for('static', filename='libs/jquery/jquery.min.js') }}"></script>
+<script type="text/javascript">
+
+    var selectProject = $( "select#rdb-covert-project" ).val();
+    if ( selectProject != '' ) {
+        $('.rdb_milestones').remove();
+        listRdbMileStones(selectProject);
+
+    }
+
+    $('#rdb-covert-project').change(function() {
+        var selected = $(this).val();
+        $('.rdb_milestones').remove();
+        listRdbMileStones(selected);
+
+    });
+
+    $('#rdb-covert-milestone').change(function() {
+        $("#isRequiredMile").remove();
+
+    });
+
+    function listRdbMileStones(selectedproj) {
+        var rdb_pmObj = {{ rdb_project_milestones|safe }};
+        var rdb_pmJson = JSON.stringify(rdb_pmObj)
+        var rdb_pmArr = JSON.parse(rdb_pmJson)
+
+        for (var i = 0; i < rdb_pmArr.length; i++){
+            if ( rdb_pmArr[i]['project'] == selectedproj ) {
+                var rdb_milestones = rdb_pmArr[i]['milestones'];
+                for (var j = 0; j < rdb_milestones.length; j++) {
+                $( '<option class="rdb_milestones" value="'+ rdb_milestones[j]+ '">'+
+                    rdb_milestones[j]+'</option>' ).appendTo( "#rdb-covert-milestone" );
+                }
+            }
+        }
+
+    }
+
+</script>
